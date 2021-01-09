@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { checkWinner, getBestMove } from '../src/Logics';
 
-let boardInitial = [['', '', ''],['', '', ''],['', '', '']];
+let boardInitial = [['', '', ''], ['', '', ''], ['', '', '']];
 
 const Board = () => {
 
@@ -21,6 +21,7 @@ const Board = () => {
   }, [currentPlayer, aiSign]);
 
   const selectCell = (row, col) => {
+    if (!!winner) return;
     console.log(`row: ${row}, col: ${col}`);
     const newBoard = [...board];
     newBoard[row][col] = humanSign;
@@ -33,8 +34,8 @@ const Board = () => {
     console.log('resetting game..');
     setBoard(JSON.parse(JSON.stringify(boardInitial)));
     setWinner(false);
-    setHumanSign('');
-    setAiSign('');
+    // setHumanSign('');
+    // setAiSign('');
     setCurrentPlayer('X');
   }
 
@@ -42,24 +43,26 @@ const Board = () => {
     setHumanSign(sign);
     setAiSign(sign == 'X' ? 'O' : 'X');
   }
-  
+
 
   return (
     <div className='p-3 md:p-10'>
-      {!humanSign &&
-          <div className='my-5 border-b-2 p-3'>
-            <span>{`Please select side: `}</span>
-            {['X', 'O'].map(sign => <span key={sign} className='mx-2 p-3 border cursor-pointer' onClick={() => selectSide(sign)}>{sign}</span>)}
-          </div>
-      }
-      <div className='w-1/5'>
+      <div className='my-5 border-b-2 p-3'>
+        <span>{`Please select side: `}</span>
+        {['X', 'O'].map(sign => <span key={sign} 
+          className={`mx-2 p-3 border cursor-pointer ${humanSign==sign ? 'bg-yellow-300' : ''} `} 
+          onClick={() => selectSide(sign)}>
+          {sign}
+          </span>)}
+      </div>
+      <div className=''>
         {board.map((row, rowIndex) => (
-          <div key={rowIndex} className='flex justify-between'>
+          <div key={rowIndex} className='flex justify-center'>
             {
               row.map((cell, colIndex) => (
                 <span
                   key={colIndex}
-                  className='border border-yellow-400 p-3 w-10 h-10 cursor-pointer'
+                  className='border bg-yellow-500 hover:bg-yellow-400 rounded-lg text-white m-2 py-5 text-center text-3xl font-semibold w-20 h-20 cursor-pointer'
                   onClick={() => selectCell(rowIndex, colIndex)}>
                   {cell}
                 </span>
