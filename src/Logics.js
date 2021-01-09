@@ -1,8 +1,11 @@
 
-let scores = {
-    X: 10,
-    O: -10,
-    tie: 0
+const getScore = (winner, ai, human) => {
+    if( winner === ai ) {
+        return 10;
+    } else if( winner === human ) {
+        return -10;
+    }
+    return 0;
 };
 const equals3 = (a, b, c) => a == b && b == c && a != '';
 
@@ -51,7 +54,7 @@ export function getBestMove(board, ai, human) {
             // Is the spot available?
             if (board[i][j] == '') {
                 board[i][j] = ai;
-                let score = minimax(board, 0, false, ai, human);
+                let score = minimax(board, human, ai, human);
                 console.log(`getBestMove: score for [${i}][${j}]: ${score}`);
 
                 board[i][j] = '';
@@ -65,23 +68,23 @@ export function getBestMove(board, ai, human) {
     return move;
 }
 
-function minimax(board, depth, isMaximizing, ai, human) {
+function minimax(board, player, ai, human) {
     let result = checkWinner(board);
     if (result !== null) {
         // console.log('minimax: return: ', scores[result]);
-        return scores[result];
+        return getScore(result, ai, human);
     }
 
-    if (isMaximizing) {
+    if (player == ai) {
         let bestScore = -Infinity;
         for (let i = 0; i < 3; i++) {
             for (let j = 0; j < 3; j++) {
                 // Is the spot available?
                 if (board[i][j] == '') {
-                    board[i][j] = ai;
-                    let score = minimax(board, depth + 1, false, ai, human);
+                    board[i][j] = player;
+                    let score = minimax(board, human, ai, human);
                     board[i][j] = '';
-                    bestScore = Math.max(score, bestScore);
+                    bestScore = Math.max(score, bestScore) ;
                 }
             }
         }
@@ -93,8 +96,8 @@ function minimax(board, depth, isMaximizing, ai, human) {
             for (let j = 0; j < 3; j++) {
                 // Is the spot available?
                 if (board[i][j] == '') {
-                    board[i][j] = human;
-                    let score = minimax(board, depth + 1, true, ai, human);
+                    board[i][j] = player;
+                    let score = minimax(board, ai, ai, human);
                     board[i][j] = '';
                     bestScore = Math.min(score, bestScore);
                 }
