@@ -1,26 +1,62 @@
+export function getBestMove(board, player) {
+    // AI to make its turn
+    let bestScore = -Infinity;
+    let bestMove;
+    const availableMoves = getEmptyCells(board);
+    for (let move of availableMoves) {
+        board[move[0]][move[1]] = player;
+        let score = minimax(board, getOpponent(player), false);
+        console.log(`getBestMove: score for [${move[0]}][${move[1]}]: ${score}`);
+        board[move[0]][move[1]] = "";
+        if (score > bestScore) {
+            bestScore = score;
+            bestMove = { row: move[0], col: move[1] };
+        }
+    }
+    return bestMove;
+}
+function minimax(board, player, isMax) {
+    let result = checkWinner(board);
+    if (result !== null) {
+        return getScore(result, isMax ? player : getOpponent(player));
+    }
+    const availableMoves = getEmptyCells(board);
+    let bestScore;
+    bestScore = isMax ? -Infinity : Infinity;
+    for (let move of availableMoves) {
+        board[move[0]][move[1]] = player;
+        let score = minimax(board, getOpponent(player), !isMax);
+        board[move[0]][move[1]] = "";
+        bestScore = isMax ? Math.max(score, bestScore) : Math.min(score, bestScore);
+    }
+    return bestScore;
+}
 
-const getScore = (winner, ai, human) => {
-    if( winner === ai ) {
+const getScore = (winner, player) => {
+    if (winner === player) {
         return 10;
-    } else if( winner === human ) {
+    } else if (winner === getOpponent(player)) {
         return -10;
     }
     return 0;
 };
+
 const equals3 = (a, b, c) => a == b && b == c && a != '';
+
+const getOpponent = player => player == 'X' ? 'O' : 'X';
 
 export function checkWinner(board) {
     let winner = null;
     // horizontal
-    for (let i = 0; i < 3; i++) {
-        if (equals3(board[i][0], board[i][1], board[i][2])) {
-            winner = board[i][0];
+    for (let rowIndex in board) {
+        if (equals3(board[rowIndex][0], board[rowIndex][1], board[rowIndex][2])) {
+            winner = board[rowIndex][0];
         }
     }
     // Vertical
-    for (let i = 0; i < 3; i++) {
-        if (equals3(board[0][i], board[1][i], board[2][i])) {
-            winner = board[0][i];
+    for (let colIndex in board[0]) {
+        if (equals3(board[0][colIndex], board[1][colIndex], board[2][colIndex])) {
+            winner = board[0][colIndex];
         }
     }
     // Diagonal
@@ -30,80 +66,22 @@ export function checkWinner(board) {
     if (equals3(board[2][0], board[1][1], board[0][2])) {
         winner = board[2][0];
     }
-    let openSpots = 0;
-    for (let i = 0; i < 3; i++) {
-        for (let j = 0; j < 3; j++) {
-            if (board[i][j] == '') {
-                openSpots++;
-            }
-        }
-    }
-    if (winner == null && openSpots == 0) {
+    let emptyCells = getEmptyCells(board);
+    if (winner == null && emptyCells.length == 0) {
         return 'tie';
     } else {
         return winner;
     }
 }
 
-export function getBestMove(board, ai, human) {
-    // AI to make its turn
-    let bestScore = -Infinity;
-    let move;
-    for (let i = 0; i < 3; i++) {
-        for (let j = 0; j < 3; j++) {
-            // Is the spot available?
-            if (board[i][j] == '') {
-                board[i][j] = ai;
-                let score = minimax(board, human, ai, human);
-                console.log(`getBestMove: score for [${i}][${j}]: ${score}`);
-
-                board[i][j] = '';
-                if (score > bestScore) {
-                    bestScore = score;
-                    move = { row: i, col: j };
-                }
+const getEmptyCells = (board) => {
+    const moves = [];
+    for (let r in board) {
+        for (let c in board[r]) {
+            if (board[r][c] == '') {
+                moves.push([parseInt(r), parseInt(c)]);
             }
         }
     }
-    return move;
-}
-
-function minimax(board, player, ai, human) {
-    let result = checkWinner(board);
-    if (result !== null) {
-        // console.log('minimax: return: ', scores[result]);
-        return getScore(result, ai, human);
-    }
-
-    if (player == ai) {
-        let bestScore = -Infinity;
-        for (let i = 0; i < 3; i++) {
-            for (let j = 0; j < 3; j++) {
-                // Is the spot available?
-                if (board[i][j] == '') {
-                    board[i][j] = player;
-                    let score = minimax(board, human, ai, human);
-                    board[i][j] = '';
-                    bestScore = Math.max(score, bestScore) ;
-                }
-            }
-        }
-        // console.log('minimax: isMaximizing: bestScore: ', bestScore);
-        return bestScore;
-    } else {
-        let bestScore = Infinity;
-        for (let i = 0; i < 3; i++) {
-            for (let j = 0; j < 3; j++) {
-                // Is the spot available?
-                if (board[i][j] == '') {
-                    board[i][j] = player;
-                    let score = minimax(board, ai, ai, human);
-                    board[i][j] = '';
-                    bestScore = Math.min(score, bestScore);
-                }
-            }
-        }
-        // console.log('minimax: !isMaximizing: bestScore: ', bestScore);
-        return bestScore;
-    }
+    return moves;
 }
