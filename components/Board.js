@@ -21,7 +21,7 @@ const Board = () => {
   }, [currentPlayer, aiSign]);
 
   const selectCell = (row, col) => {
-    if (!!winner) return;
+    if (!!winner || board[row][col] !== '') return;
     console.log(`row: ${row}, col: ${col}`);
     const newBoard = [...board];
     newBoard[row][col] = humanSign;
